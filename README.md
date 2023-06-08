@@ -6,3 +6,6 @@ This is examples repository for "Java - Video Card capabilities" article, russia
 
 Репозиторий примеров для статьи "Применим возможности видеокарты в вашей Java-программе". Статью можно найти по адресу https://dou.ua/lenta/articles/java-video-card-capabilities/
 
+![img.png](img.png)
+
+![img_1.png](img_1.png)

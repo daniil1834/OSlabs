@@ -1,11 +1,11 @@
 /*
  * Copyright 2020 Viktor Gubin
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -44,7 +44,7 @@ import org.lwjgl.system.MemoryUtil;
 
 /**
  * OpenCL use-load helper
- * 
+ *
  * @author Viktor Gubin
  */
 public final class ClRuntime implements AutoCloseable {
@@ -101,7 +101,7 @@ public final class ClRuntime implements AutoCloseable {
 
   /**
    * Returns list of OpenCL platforms supported by this environment
-   * 
+   *
    * @return list of OpenCL platforms
    */
   public NavigableSet<Platform> getPlatforms() {
@@ -140,13 +140,13 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Returns this platform vendor name string
-     * 
+     *
      * @return platform vendor name
      */
     public String getVendor() {
       return capabilities.cl_khr_icd
-          ? getPlatformInfoStringASCII(id, KHRICD.CL_PLATFORM_ICD_SUFFIX_KHR)
-          : getPlatformInfoStringUTF8(id, CL_PLATFORM_VENDOR);
+              ? getPlatformInfoStringASCII(id, KHRICD.CL_PLATFORM_ICD_SUFFIX_KHR)
+              : getPlatformInfoStringUTF8(id, CL_PLATFORM_VENDOR);
     }
 
     private NavigableSet<Device> getDevices(int deviceType) {
@@ -169,7 +169,7 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Returns list of GPU based devices provided by this platform
-     * 
+     *
      * @return list of GPU based devices
      */
     public NavigableSet<Device> getGPUDevices() {
@@ -178,7 +178,7 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Returns list of CPU based devices provided by this platform
-     * 
+     *
      * @return list of �PU based devices
      */
     public NavigableSet<Device> getCPUDevices() {
@@ -187,7 +187,7 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Returns list of accelerator based devices provided by this platform
-     * 
+     *
      * @return list of accelerator based devices
      */
     public NavigableSet<Device> getAcceleratorDevices() {
@@ -196,14 +196,14 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Returns default device for this platform
-     * 
+     *
      * @return default device
      */
     public Device getDefault() {
       try (MemoryStack stack = MemoryStack.stackPush()) {
         final PointerBuffer deviceIDs = stack.mallocPointer(1);
         validateCL(clGetDeviceIDs(this.id, CL_DEVICE_TYPE_DEFAULT, deviceIDs, (IntBuffer) null),
-            "Can not obtain OpenCL default device");
+                "Can not obtain OpenCL default device");
         final ByteBuffer typeBuf = stack.malloc(Long.BYTES);
         validateCL(clGetDeviceInfo(deviceIDs.get(0), CL_DEVICE_TYPE, typeBuf, null));
         return new Device(deviceIDs.get(0), typeBuf.getInt());
@@ -268,7 +268,7 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Creates OpenCL context
-     * 
+     *
      * @return new OpenCL context
      */
     public Context createContext() {
@@ -306,7 +306,7 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Creates OpenCL command queue object
-     * 
+     *
      * @return command queue object
      */
     private CommandQueue createCommandQueue() {
@@ -320,7 +320,7 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Creates OpenCL program and load shader to it
-     * 
+     *
      * @param source - OpenCL C shader source
      * @return new OpenCL program
      */
@@ -337,7 +337,7 @@ public final class ClRuntime implements AutoCloseable {
           break;
         case CL_BUILD_PROGRAM_FAILURE:
           throw new IllegalStateException("Failure to build the program executable"
-              + getProgramBuildInfo(CL_PROGRAM_BUILD_LOG));
+                  + getProgramBuildInfo(CL_PROGRAM_BUILD_LOG));
         case CL_OUT_OF_RESOURCES:
           throw new OutOfMemoryError("No resources left");
         case CL_OUT_OF_HOST_MEMORY:
@@ -371,7 +371,7 @@ public final class ClRuntime implements AutoCloseable {
       try (MemoryStack stack = MemoryStack.stackPush()) {
         PointerBuffer pp = stack.mallocPointer(1);
         validateCL(
-            clGetProgramBuildInfo(this.id, this.device.getId(), paramName, (ByteBuffer) null, pp));
+                clGetProgramBuildInfo(this.id, this.device.getId(), paramName, (ByteBuffer) null, pp));
         int bytes = (int) pp.get(0);
         ByteBuffer buffer = stack.malloc(bytes);
         validateCL(clGetProgramBuildInfo(this.id, this.device.getId(), paramName, buffer, null));
@@ -402,7 +402,7 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Returns current program command queue
-     * 
+     *
      * @return
      */
     public CommandQueue getCommandQueue() {
@@ -411,7 +411,7 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Obtains OpenCL kernel from this program
-     * 
+     *
      * @param name kernel name as specified in shader
      * @return kernel object
      */
@@ -429,16 +429,16 @@ public final class ClRuntime implements AutoCloseable {
               throw new IllegalStateException("Invalid kernel name");
             case CL_INVALID_KERNEL_DEFINITION:
               throw new IllegalStateException(
-                  "The function definition for __kernel function given by"
-                      + "kernel_name such as the number of arguments, "
-                      + "the argument types are not the same for all devices for which the program executable "
-                      + "has been built.");
+                      "The function definition for __kernel function given by"
+                              + "kernel_name such as the number of arguments, "
+                              + "the argument types are not the same for all devices for which the program executable "
+                              + "has been built.");
             case CL_OUT_OF_RESOURCES:
               throw new OutOfMemoryError(
-                  "Failure to allocate resources required by the OpenCL implementation on the device.");
+                      "Failure to allocate resources required by the OpenCL implementation on the device.");
             case CL_OUT_OF_HOST_MEMORY:
               throw new OutOfMemoryError(
-                  "Failure to allocate resources required by the OpenCL implementation on the host.");
+                      "Failure to allocate resources required by the OpenCL implementation on the host.");
             default:
               throw new IllegalStateException("OpenCL error. Code: " + err.get());
           }
@@ -494,7 +494,7 @@ public final class ClRuntime implements AutoCloseable {
     private void addArg(int index, int val) {
       try (MemoryStack stack = MemoryStack.stackPush()) {
         validateArg(
-            clSetKernelArg(this.getId(), index, (IntBuffer) stack.mallocInt(1).put(val).flip()));
+                clSetKernelArg(this.getId(), index, (IntBuffer) stack.mallocInt(1).put(val).flip()));
       }
     }
 
@@ -508,19 +508,19 @@ public final class ClRuntime implements AutoCloseable {
 
     private void addArg(int index, float val) {
       try (MemoryStack stack = MemoryStack.stackPush()) {
-        validateArg(clSetKernelArg(this.getId(), index, stack.mallocFloat(1).put(val).flip()));
+        validateArg(clSetKernelArg(this.getId(), index, (ByteBuffer) stack.mallocFloat(1).put(val).flip()));
       }
     }
 
     private void addArg(int index, double val) {
       try (MemoryStack stack = MemoryStack.stackPush()) {
-        validateArg(clSetKernelArg(this.getId(), index, stack.mallocDouble(1).put(val).flip()));
+        validateArg(clSetKernelArg(this.getId(), index, (ByteBuffer) stack.mallocDouble(1).put(val).flip()));
       }
     }
 
     /**
      * Sequential add kernel argument
-     * 
+     *
      * @param val argument value to bind
      */
     public Kernel arg(int value) {
@@ -531,7 +531,7 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Sequential add kernel argument
-     * 
+     *
      * @param val argument value to bind
      */
     public final Kernel arg(final VideoMemBuffer value) {
@@ -542,7 +542,7 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Sequential add kernel argument
-     * 
+     *
      * @param val argument value to bind
      */
     public final Kernel arg(float value) {
@@ -553,7 +553,7 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Sequential add kernel argument
-     * 
+     *
      * @param val argument value to bind
      */
     public final Kernel arg(double value) {
@@ -583,14 +583,14 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Executes this kernel on device as data parallel
-     * 
+     *
      * @param globalWorkSize - data parallel global work size
      * @throws ExecutionException in case of OpenCL error
      */
     public void executeAsDataParallel(final long globalWorkSize) throws ExecutionException {
       validateErrorCode(clEnqueueNDRangeKernel(cmdQueue.getId(), id, 1, (PointerBuffer) null,
-          MemoryStack.stackPointers(globalWorkSize), (PointerBuffer) null, (PointerBuffer) null,
-          (PointerBuffer) null));
+              MemoryStack.stackPointers(globalWorkSize), (PointerBuffer) null, (PointerBuffer) null,
+              (PointerBuffer) null));
     }
 
     long getId() {
@@ -628,7 +628,7 @@ public final class ClRuntime implements AutoCloseable {
       try (MemoryStack stack = MemoryStack.stackPush()) {
         IntBuffer err = stack.mallocInt(1);
         long bufferId = nclCreateBuffer(this.context.getId(),
-            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, size, buffer, MemoryUtil.memAddressSafe(err));
+                CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, size, buffer, MemoryUtil.memAddressSafe(err));
         if (CL_OUT_OF_HOST_MEMORY == err.get(0)) {
           throw new OutOfMemoryError("Can not allocate memory");
         }
@@ -642,7 +642,7 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Creates OpenCL read only memory buffer pointing on host memory (normal RAM)
-     * 
+     *
      * @param buffer a host memory buffer
      */
     public VideoMemBuffer hostPtrReadBuffer(ByteBuffer buffer) {
@@ -651,47 +651,47 @@ public final class ClRuntime implements AutoCloseable {
 
     /**
      * Creates OpenCL read only memory buffer pointing on host memory (normal RAM)
-     * 
+     *
      * @param buffer a host memory buffer
      */
     public VideoMemBuffer hostPtrReadBuffer(ShortBuffer buffer) {
       return hostPtrReadBuffer(MemoryUtil.memAddressSafe(buffer),
-          (buffer.remaining() * Short.BYTES));
+              (buffer.remaining() * Short.BYTES));
     }
 
     /**
      * Creates OpenCL read only memory buffer pointing on host memory (normal RAM)
-     * 
+     *
      * @param buffer a host memory buffer
      */
     public VideoMemBuffer hostPtrReadBuffer(IntBuffer buffer) {
       return hostPtrReadBuffer(MemoryUtil.memAddressSafe(buffer),
-          (buffer.remaining() * Integer.BYTES));
+              (buffer.remaining() * Integer.BYTES));
     }
 
     /**
      * Creates OpenCL read only memory buffer pointing on host memory (normal RAM)
-     * 
+     *
      * @param buffer a host memory buffer
      */
     public VideoMemBuffer hostPtrReadBuffer(LongBuffer buffer) {
       return hostPtrReadBuffer(MemoryUtil.memAddressSafe(buffer),
-          (buffer.remaining() * Integer.BYTES));
+              (buffer.remaining() * Integer.BYTES));
     }
 
     /**
      * Creates OpenCL read only memory buffer pointing on host memory (normal RAM)
-     * 
+     *
      * @param buffer a host memory buffer
      */
     public VideoMemBuffer hostPtrReadBuffer(FloatBuffer buffer) {
       return hostPtrReadBuffer(MemoryUtil.memAddressSafe(buffer),
-          (buffer.remaining() * Float.BYTES));
+              (buffer.remaining() * Float.BYTES));
     }
 
     /**
      * Creates OpenCL read only memory buffer pointing on host memory (normal RAM)
-     * 
+     *
      * @param buffer a host memory buffer
      */
     public VideoMemBuffer hostPtrReadBuffer(DoubleBuffer buffer) {
